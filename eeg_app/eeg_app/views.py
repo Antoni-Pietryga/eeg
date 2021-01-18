@@ -10,7 +10,11 @@ import matplotlib.pyplot as plt
 sample_data_folder = mne.datasets.sample.data_path()
 sample_data_raw_file = os.path.join(sample_data_folder, 'MEG', 'sample', 'sample_audvis_raw.fif')
 
-    
+def fopen(fname):
+    with open(fname, "rb") as image_file:
+        plik = base64.b64encode(image_file.read()).decode('utf-8')
+    return plik
+        
 def get_channels():
     raw = mne.io.read_raw_fif(sample_data_raw_file, preload=True, verbose=False)
     eeg_ch = [raw.ch_names[i] for i in mne.pick_types(raw.info, eeg=True)]
@@ -43,12 +47,8 @@ def chart_meg(channels):
     fig = epochs.plot(n_epochs=20, show=False)
     fig.savefig("meg2.png")
     
-    with open("meg1.png", "rb") as image_file:
-        meg1 = base64.b64encode(image_file.read()).decode('utf-8')
-        
-    with open("meg2.png", "rb") as image_file:
-        meg2 = base64.b64encode(image_file.read()).decode('utf-8')
-    
+    meg1 = fopen("meg1.png")
+    meg2 = fopen("meg2.png")
     return meg1, meg2
 
 
@@ -102,17 +102,12 @@ def create_sensors_chart(channels):
  
     fig_2d = raw.plot_sensors(show=False, show_names=True)
     fig_3d = raw.plot_sensors(kind='3d', show=False)
-    os.remove("umiejscowienie_elektrod_2d.png")
-    os.remove("umiejscowienie_elektrod_3d.png")
     fig_2d.savefig("umiejscowienie_elektrod_2d.png")
     fig_3d.savefig("umiejscowienie_elektrod_3d.png")
     
-    
-    with open("umiejscowienie_elektrod_2d.png", "rb") as image_file:
-        image_data_2d = base64.b64encode(image_file.read()).decode('utf-8')
+    image_data_2d = fopen("umiejscowienie_elektrod_2d.png")
+    image_data_3d = fopen("umiejscowienie_elektrod_3d.png")
 
-    with open("umiejscowienie_elektrod_3d.png", "rb") as image_file:
-        image_data_3d = base64.b64encode(image_file.read()).decode('utf-8')
 
     
     if ch_type == "EEG":
@@ -120,16 +115,9 @@ def create_sensors_chart(channels):
         fig = raw.plot(duration=10, order=eeg_chanels, n_channels=len(eeg_chanels), show=False)
         fig.savefig("niefiltrowane_eeg.png")
         evoked(channels)
-        
-        with open("niefiltrowane_eeg.png", "rb") as image_file:
-            image_data_eeg_notf = base64.b64encode(image_file.read()).decode('utf-8')
-        
-        with open("evoked_target.png", "rb") as image_file:
-            evoked_target = base64.b64encode(image_file.read()).decode('utf-8')
-
-        with open("evoked_standard.png", "rb") as image_file:
-            evoked_standard = base64.b64encode(image_file.read()).decode('utf-8')
-
+        image_data_eeg_notf = fopen('niefiltrowane_eeg.png')
+        evoked_target = fopen('evoked_target.png')
+        evoked_standard = fopen('evoked_standard.png')
         
         return {"status":"ok", "img_data_2d":image_data_2d,  "img_data_3d":image_data_3d, "chart_data": image_data_eeg_notf, "ch_type": "EEG", "evoked_target":evoked_target, "evoked_standard": evoked_standard}
     
@@ -177,8 +165,7 @@ def apply_filter(high, low, channels):
     eeg_chanels = [raw.ch_names.index(i) for i in channels]
     fig = raw.plot(duration=10, order=eeg_chanels, n_channels=len(eeg_chanels), show=False)
     fig.savefig("filtrowane_eeg.png")
-    with open("filtrowane_eeg.png", "rb") as image_file:
-        image_data_eeg_f = base64.b64encode(image_file.read()).decode('utf-8')
+    image_data_eeg_f = fopen("image_data_eeg_f.png")
     return image_data_eeg_f    
 
 
@@ -194,11 +181,9 @@ def index(request):
              
             return JsonResponse(data)
         elif data["action"] == "send_filter":
-            with open("evoked_target.png", "rb") as image_file:
-                evoked_target = base64.b64encode(image_file.read()).decode('utf-8')
+            evoked_target = fopen("evoken_target.png")
 
-            with open("evoked_standard.png", "rb") as image_file:
-                evoked_standard = base64.b64encode(image_file.read()).decode('utf-8')
+            evoked_standard = fopen("evoken_standard.png")
         
             return JsonResponse({"data":apply_filter(data["high_pass"], data["low_pass"], data["channels"]), "evoked_target":evoked_target, "evoked_standard": evoked_standard})
         
