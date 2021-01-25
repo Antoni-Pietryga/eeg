@@ -40,15 +40,15 @@ def chart_meg(channels):
     baseline = (-0.1, 0)
     epochs = mne.Epochs(raw, events=events, event_id=event_id, tmin=-0.1, tmax=0.5, baseline=baseline, reject=None)
     fig = epochs.plot(block=True, show=False)
-    fig.savefig("meg1.png")
+    fig.savefig("Wykresy/meg1.png")
     
     
     epochs = mne.Epochs(raw_filtered, events, tmin=-0.1, tmax=0.5)
     fig = epochs.plot(n_epochs=20, show=False)
-    fig.savefig("meg2.png")
+    fig.savefig("Wykresy/meg2.png")
     
-    meg1 = fopen("meg1.png")
-    meg2 = fopen("meg2.png")
+    meg1 = fopen("Wykresy/meg1.png")
+    meg2 = fopen("Wykresy/meg2.png")
     return meg1, meg2
 
 
@@ -68,10 +68,10 @@ def evoked(channels):
     evoked_target = epochs['Target'].average(picks=picks)
 
     fig = evoked_target.plot(spatial_colors=True, show=False)
-    fig.savefig("evoked_target.png")
+    fig.savefig("Wykresy/evoked_target.png")
     
     fig = evoked_standard.plot(spatial_colors=True, show=False)
-    fig.savefig("evoked_standard.png")
+    fig.savefig("Wykresy/evoked_standard.png")
 
 def create_sensors_chart(channels):
     raw = mne.io.read_raw_fif(sample_data_raw_file, preload=True, verbose=False)
@@ -102,22 +102,22 @@ def create_sensors_chart(channels):
  
     fig_2d = raw.plot_sensors(show=False, show_names=True)
     fig_3d = raw.plot_sensors(kind='3d', show=False)
-    fig_2d.savefig("umiejscowienie_elektrod_2d.png")
-    fig_3d.savefig("umiejscowienie_elektrod_3d.png")
+    fig_2d.savefig("Wykresy/umiejscowienie_elektrod_2d.png")
+    fig_3d.savefig("Wykresy/umiejscowienie_elektrod_3d.png")
     
-    image_data_2d = fopen("umiejscowienie_elektrod_2d.png")
-    image_data_3d = fopen("umiejscowienie_elektrod_3d.png")
+    image_data_2d = fopen("Wykresy/umiejscowienie_elektrod_2d.png")
+    image_data_3d = fopen("Wykresy/umiejscowienie_elektrod_3d.png")
 
 
     
     if ch_type == "EEG":
         eeg_chanels = [raw.ch_names.index(i) for i in channels]
         fig = raw.plot(duration=10, order=eeg_chanels, n_channels=len(eeg_chanels), show=False)
-        fig.savefig("niefiltrowane_eeg.png")
+        fig.savefig("Wykresy/niefiltrowane_eeg.png")
         evoked(channels)
-        image_data_eeg_notf = fopen('niefiltrowane_eeg.png')
-        evoked_target = fopen('evoked_target.png')
-        evoked_standard = fopen('evoked_standard.png')
+        image_data_eeg_notf = fopen('Wykresy/niefiltrowane_eeg.png')
+        evoked_target = fopen('Wykresy/evoked_target.png')
+        evoked_standard = fopen('Wykresy/evoked_standard.png')
         
         return {"status":"ok", "img_data_2d":image_data_2d,  "img_data_3d":image_data_3d, "chart_data": image_data_eeg_notf, "ch_type": "EEG", "evoked_target":evoked_target, "evoked_standard": evoked_standard}
     
@@ -164,8 +164,8 @@ def apply_filter(high, low, channels):
     raw = raw.filter(l_freq=low, h_freq=high)
     eeg_chanels = [raw.ch_names.index(i) for i in channels]
     fig = raw.plot(duration=10, order=eeg_chanels, n_channels=len(eeg_chanels), show=False)
-    fig.savefig("filtrowane_eeg.png")
-    image_data_eeg_f = fopen("image_data_eeg_f.png")
+    fig.savefig("Wykresy/filtrowane_eeg.png")
+    image_data_eeg_f = fopen("Wykresy/image_data_eeg_f.png")
     return image_data_eeg_f    
 
 
@@ -181,9 +181,9 @@ def index(request):
              
             return JsonResponse(data)
         elif data["action"] == "send_filter":
-            evoked_target = fopen("evoken_target.png")
+            evoked_target = fopen("Wykresy/evoked_target.png")
 
-            evoked_standard = fopen("evoken_standard.png")
+            evoked_standard = fopen("Wykresy/evoked_standard.png")
         
             return JsonResponse({"data":apply_filter(data["high_pass"], data["low_pass"], data["channels"]), "evoked_target":evoked_target, "evoked_standard": evoked_standard})
         
